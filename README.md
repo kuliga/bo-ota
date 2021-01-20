@@ -1,2 +1,2 @@
-# bo-ota
-Bootloader program supporting IAP featiure enabling OTA-via-BT feature for FRDM-KL46Z board
+# BO-OTA
+Bootloader program enabling OTA-via-BT software upgrade feature for FRDM-KL46Z board
