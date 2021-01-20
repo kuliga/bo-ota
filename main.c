@@ -16,6 +16,11 @@
 void Reset_Handler(void);
 
 /*
+ *Initialize UART0
+ */
+void uart0_poll_init(void);
+
+/*
  *TODO: add comments
  */
 /*
@@ -32,8 +37,11 @@ __attribute__((naked)) inline void goto_userspace(void)
 
 int main(void)
 {
+        uart0_poll_init();
         uint32_t *userspace = (uint32_t*) __ram_userspace_start__;
         uint32_t x = *userspace;
+        
+        while (1);
 }
 
 
@@ -59,6 +67,20 @@ void Reset_Handler(void)
         main();
         
         while (1);
+}
+
+void uart0_poll_init(void)
+{
+        SIM->SOPT2 |= 1 << SIM_SOPT2_UART0SRC_SHIFT;
+        SIM->SCGC4 |= 1 << SIM_SCGC4_UART0_SHIFT;
+        SIM->SCGC5 |= 1 << SIM_SCGC5_PORTA_SHIFT;
+        PORTA->PCR[1] = PORT_PCR_MUX(2);
+        UART0->BDH = 0;
+        UART0->BDL = 91;
+        UART0->C4 &= ~UART0_C4_OSR_MASK;
+        UART0->C4 |= UART0_C4_OSR(15);	
+        UART0->C5 |= UART0_C5_BOTHEDGE_MASK;	
+        UART0->C2 |= 1 << UART0_C2_RE_SHIFT;
 }
         
         
