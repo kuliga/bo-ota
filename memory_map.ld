@@ -6,10 +6,12 @@ MEMORY
   RAM (rwx) : ORIGIN = 0x20002000, LENGTH = 0x00004000
 }
 
-STACK_SIZE = 0x0D00;
+__stack_size__ = 0x0D00;
 __rom_bootloader_start__ = ORIGIN(ROM_BOOTLOADER);
 __ram_userspace_start__ = ORIGIN(RAM_USERSPACE);
 __ram_shared_start__ = ORIGIN(RAM_SHARED);
+__ram_userspace_size__ = LENGTH(RAM_USERSPACE);
+__ram_start__ = ORIGIN(RAM);
 
 SECTIONS 
 {
@@ -50,7 +52,7 @@ SECTIONS
     {
         . = ALIGN(8);
         _sstack = .;
-        . = . + STACK_SIZE;
+        . = . + __stack_size__;
         . = ALIGN(8);
         _estack = .;
     } > RAM
