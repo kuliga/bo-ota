@@ -8,10 +8,16 @@
 #include "MKL46Z4.h"
 
 /*
- *Reset handler for bootloader, invoked during MCU's startup.
+ *Vector Table Offset Register
+ */
+#define VTOR_REG 0xE000ED08
+#define VTOR_TBLOFF_MASK                (0xFFFFFFUL << 8)    
+
+/*
+ *Reset handler, invoked during MCU's startup.
  *Sets clocks, disables IRQs, initializes .bss section with zeros,
  *copies initialized variables to .data section, fills userspace with zeros,
- *branches to main().
+ *relocates .vectors table, branches to main().
  */
 void Reset_Handler(void);
 
@@ -39,7 +45,9 @@ int main(void)
 {
         uart0_poll_init();
         uint32_t *userspace = (uint32_t*) __ram_userspace_start__;
-        uint32_t x = *userspace;
+        
+        
+        //goto_userspace();
         
         while (1);
 }
@@ -51,19 +59,23 @@ void Reset_Handler(void)
         
         __disable_irq();
         
-        uint32_t *bss = &_sbss;
-        for (bss; bss < &_ebss; bss++)
-                *bss = 0;
+        uint32_t *tmp = &_sbss;
+        for (tmp; tmp < &_ebss; tmp++)
+                *tmp = 0;
                 
-        uint32_t *data = &_sdata;
+        tmp = &_sdata;
         uint32_t *init_vars = &_etext;
-        for (data; data < &_edata; data++)
-                *data = *init_vars++;
+        for (tmp; tmp < &_edata; tmp++)
+                *tmp = *init_vars++;
         
-        uint32_t *usrspc = &__ram_userspace_start__;
-        for (usrspc; usrspc < &__ram_start__; usrspc++)
-                *usrspc = 0; 
+        tmp = &__ram_userspace_start__;
+        for (tmp; tmp < &__ram_start__; tmp++)
+                *tmp = 0; 
         
+        tmp = &_stext;
+        uint32_t *vtor = VTOR_REG;
+        *vtor = ((uint32_t) tmp & VTOR_TBLOFF_MASK);
+                
         main();
         
         while (1);
