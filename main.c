@@ -31,7 +31,7 @@ __attribute__((naked)) inline void goto_userspace(void)
 */
 int main(void)
 {
-        uint32_t *userspace = (uint32_t*) __rom_userspace_start__;
+        uint32_t *userspace = (uint32_t*) __ram_userspace_start__;
         uint32_t x = *userspace;
 }
 
@@ -48,7 +48,6 @@ void Reset_Handler(void)
         uint32_t *init_vars = &_etext;
         for (data; data < &_edata; data++)
                 *data = *init_vars++;
-        //SIM->FCFG1 = 1;
         
         main();
         

@@ -22,7 +22,7 @@
   .syntax unified
   .code 16
 
-  .section .init, "ax"
+  .section .text, "ax"
   .align 0
 
 /*****************************************************************************
@@ -311,11 +311,11 @@ PORTC_PORTD_IRQHandler:
   .section .vectors, "ax"
   .align 0
   .global _vectors
-  .extern __stack_end__
+  .extern _estack
   .extern Reset_Handler
 
 _vectors:
-  .word __stack_end__
+  .word _estack
   .word Reset_Handler
   .word NMI_Handler
   .word HardFault_Handler
