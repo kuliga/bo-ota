@@ -43,13 +43,17 @@ __attribute__((naked)) inline void goto_userspace(void)
 
 int main(void)
 {
-        uart0_poll_init();
-        uint32_t *userspace = (uint32_t*) __ram_userspace_start__;
+        //uart0_poll_init();
+        
+        uint32_t *userspace = (uint32_t*) &__ram_userspace_start__;
+        *userspace = 3;
+        
+        
         
         
         //goto_userspace();
         
-        while (1);
+       while (1);
 }
 
 
@@ -76,6 +80,7 @@ void Reset_Handler(void)
         uint32_t *vtor = VTOR_REG;
         *vtor = ((uint32_t) tmp & VTOR_TBLOFF_MASK);
                 
+        /*TODO: disable flash access*/
         main();
         
         while (1);
