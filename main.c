@@ -4,22 +4,8 @@
  
 #include <stdint.h>
 #include "bootloader_mem_map.h"
-#include "system_MKL46Z4.h"
 #include "MKL46Z4.h"
-
-/*
- *Vector Table Offset Register
- */
-#define VTOR_REG 0xE000ED08
-#define VTOR_TBLOFF_MASK                (0xFFFFFFUL << 8)    
-
-/*
- *Reset handler, invoked during MCU's startup.
- *Sets clocks, disables IRQs, initializes .bss section with zeros,
- *copies initialized variables to .data section, fills userspace with zeros,
- *relocates .vectors table, branches to main().
- */
-void Reset_Handler(void);
+#include "kl46z_startup.h"
 
 /*
  *Initialize UART0
@@ -28,6 +14,7 @@ void uart0_poll_init(void);
 
 /*
  *TODO: add comments
+ *check whether here too reference in __ram_.. is needed if there's a bug
  */
 
 __attribute__((naked)) void goto_userspace(void)
@@ -37,7 +24,7 @@ __attribute__((naked)) void goto_userspace(void)
               "ldr r1, [%[pc]]\n\t"
               "msr msp, r0\n\t"
               "bx r1"
-              : :[sp] "r" (__ram_userspace_start__), [pc] "r" (__ram_userspace_start__ + 1)
+              : :[sp] "r" (__ram_userspace_start__), [pc] "r" (__ram_userspace_start__ + 4)
              );
 }
 
@@ -56,39 +43,11 @@ int main(void)
                         }
                 }
         }
-exit:           
+exit: 
+
         //SIM->FCFG1 |= SIM_FCFG1_FLASHDIS_MASK;
         goto_userspace();
                
-        while (1);
-}
-
-
-void Reset_Handler(void)
-{
-        SystemInit();
-        
-        __disable_irq();
-        
-        uint32_t *tmp = &_sbss;
-        for (tmp; tmp < &_ebss; tmp++)
-                *tmp = 0;
-                
-        tmp = &_sdata;
-        uint32_t *init_vars = &_etext;
-        for (tmp; tmp < &_edata; tmp++)
-                *tmp = *init_vars++;
-        
-        tmp = &__ram_userspace_start__;
-        for (tmp; tmp < &__ram_start__; tmp++)
-                *tmp = 0; 
-        
-        tmp = &_stext;
-        uint32_t *vtor = (uint32_t*) VTOR_REG;
-        *vtor = ((uint32_t) tmp & VTOR_TBLOFF_MASK);
-                
-        main();
-        
         while (1);
 }
 

@@ -1,5 +1,5 @@
-#ifndef BOOTMAP_H
-#define BOOTMAP_H
+#ifndef BOOTLOADER_MEM_MAP_H
+#define BOOTLOADER_MEM_MAP_H
 
 #include <stdint.h>
 
