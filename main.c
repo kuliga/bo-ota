@@ -43,13 +43,20 @@ __attribute__((naked)) inline void goto_userspace(void)
 
 int main(void)
 {
-        //uart0_poll_init();
+        uart0_poll_init();
         
         uint32_t *userspace = (uint32_t*) &__ram_userspace_start__;
-        *userspace = 3;
-        
-        
-        
+        while (1) {        
+                while (UART0->S1 & UART0_S1_RDRF_MASK) {
+                       *userspace++ = UART0->D;
+                        if (UART0->S1 & UART0_S1_IDLE_MASK) {
+                                UART0->S1 |= 1 << UART0_S1_IDLE_SHIFT;
+                                goto exit;
+                        }
+                }
+        }
+exit:
+        SIM->FCFG1 |= SIM_FCFG1_FLASHDIS_MASK;
         
         //goto_userspace();
         
@@ -80,7 +87,6 @@ void Reset_Handler(void)
         uint32_t *vtor = VTOR_REG;
         *vtor = ((uint32_t) tmp & VTOR_TBLOFF_MASK);
                 
-        /*TODO: disable flash access*/
         main();
         
         while (1);
