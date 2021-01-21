@@ -29,22 +29,23 @@ void uart0_poll_init(void);
 /*
  *TODO: add comments
  */
-/*
-__attribute__((naked)) inline void goto_userspace(void)
+
+__attribute__((naked)) void goto_userspace(void)
 {
         __asm inline (
-              "ldr r0, =%[_sp]\n\t"
-              "ldr r1, =%[_pc]\n\t"
+              "ldr r0, [%[sp]]\n\t"
+              "ldr r1, [%[pc]]\n\t"
               "msr msp, r0\n\t"
               "bx r1"
-              : :[_sp] "r" (sp), [_pc] "r" (pc)
+              : :[sp] "r" (__ram_userspace_start__), [pc] "r" (__ram_userspace_start__ + 1)
              );
-}*/
+}
+
 
 int main(void)
 {
         uart0_poll_init();
-        
+
         uint32_t *userspace = (uint32_t*) &__ram_userspace_start__;
         while (1) {        
                 while (UART0->S1 & UART0_S1_RDRF_MASK) {
@@ -55,12 +56,11 @@ int main(void)
                         }
                 }
         }
-exit:
-        SIM->FCFG1 |= SIM_FCFG1_FLASHDIS_MASK;
-        
-        //goto_userspace();
-        
-       while (1);
+exit:           
+        //SIM->FCFG1 |= SIM_FCFG1_FLASHDIS_MASK;
+        goto_userspace();
+               
+        while (1);
 }
 
 
@@ -84,7 +84,7 @@ void Reset_Handler(void)
                 *tmp = 0; 
         
         tmp = &_stext;
-        uint32_t *vtor = VTOR_REG;
+        uint32_t *vtor = (uint32_t*) VTOR_REG;
         *vtor = ((uint32_t) tmp & VTOR_TBLOFF_MASK);
                 
         main();
