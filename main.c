@@ -46,25 +46,20 @@ __attribute__((naked)) void usr(uint32_t pc, uint32_t sp)
 int main(void)
 {
         uart0_poll_init();
-        SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK;
-        PORTD->PCR[5] |= 1 << 2;
-        PTD->PDDR |= 1 << 5;
-        PTD->PSOR |= 1 << 5;
-        //uint32_t i = -
+        uint8_t i;
 
         uint8_t *userspace = (uint8_t*) &__ram_userspace_start__;
         while (1) {        
                 while (UART0->S1 & UART0_S1_RDRF_MASK) {
-                       *userspace++ = UART0->D;
-                       /*if (UART0->S1 & UART0_S1_IDLE_MASK) {
-                                UART0->S1 |= 1 << UART0_S1_IDLE_SHIFT;
-                                goto exit;
-                        }*/
+                        *userspace++ = UART0->D;
+                }
+                if (UART0->S1 & UART0_S1_IDLE_MASK) {
+                        UART0->S1 = 1 << UART0_S1_IDLE_SHIFT;
+                        goto exit;
                 }
         }
         
-        //for (
-exit:; 
+exit: ; 
 
         //SIM->FCFG1 |= SIM_FCFG1_FLASHDIS_MASK;
         //goto_userspace();
@@ -83,6 +78,7 @@ void uart0_poll_init(void)
         PORTA->PCR[1] = PORT_PCR_MUX(2);
         UART0->BDH = 0;
         UART0->BDL = 23;
+        UART0->C1 |= UART0_C1_ILT_MASK;
         UART0->C4 &= ~UART0_C4_OSR_MASK;
         UART0->C4 |= UART0_C4_OSR(15);	
         UART0->C5 |= UART0_C5_BOTHEDGE_MASK;	
@@ -117,7 +113,7 @@ void uart0_poll_init(void)
         
         /*tmp = &_stext;
         SCB->VTOR = ((uint32_t) tmp & SCB_VTOR_TBLOFF_Msk);
-       /* 
+        
         tmp = &_stext;
         uint32_t *vtor = (uint32_t*) VTOR_REG;
         *vtor = ((uint32_t) tmp & VTOR_TBLOFF_MASK);*/

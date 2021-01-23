@@ -19,9 +19,10 @@ void Reset_Handler(void)
         for (tmp; tmp < &_edata; tmp++)
                 *tmp = *init_vars++;
         
-        tmp = &__ram_userspace_start__;
+	/*ONLY FOR BOOTLOADER RESET_HANDLER        
+	tmp = &__ram_userspace_start__;
         for (tmp; tmp < &__ram_start__; tmp++)
-                *tmp = 0; 
+                *tmp = 0; */
         
         tmp = &_stext;
         uint32_t *vtor = (uint32_t*) VTOR_REG;
