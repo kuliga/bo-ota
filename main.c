@@ -15,6 +15,7 @@ enum uart_baudrate {
          __115200__ = 23,
          __28800__ = 91
 };
+ 
 /*
  *Initialize UART0.
  */
@@ -27,13 +28,17 @@ void uart0_poll_init(enum uart_baudrate br);
 void uart0_poll_deinit(void);
 
 /*
- *TODO: add comments
+ *Branch to userspace.
+ *Loads stack pointer to msp register, then branches to the address
+ *of userspace's Reset_Handler subroutine.
+ *Order of passed arguments as values for MCU's registers was determined
+ *during debugging process (ARM specific).
  */
-__attribute__((naked)) void goto_userspace(uint32_t pc, uint32_t sp)
+__attribute__((naked)) void goto_userspace(uint32_t sp, uint32_t pc)
 {
-         __asm inline(
-              "msr msp, r1\n\t"
-              "bx r0"
+        __asm inline(
+              "msr msp, r0\n\t"
+              "bx r1"
               );
 }
 
@@ -60,7 +65,7 @@ exit:  ;
        uint32_t sp = *reset_fetch;
        uint32_t pc = *(reset_fetch + 1);
        
-       goto_userspace(pc, sp);
+       goto_userspace(sp, pc);
        
        while (1);
 }
