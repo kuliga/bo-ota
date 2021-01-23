@@ -25,7 +25,7 @@ void uart0_poll_init(enum uart_baudrate br);
  *Deinitialize UARTO.
  *Needs to be done before going to userspace.
  */
-void uart0_poll_deinit(void);
+void uart0_deinit(void);
 
 /*
  *Branch to userspace.
@@ -59,7 +59,7 @@ int main(void)
         }
         
 exit:  ;
-       uart0_poll_deinit();
+       uart0_deinit();
        
        uint32_t *reset_fetch = (uint32_t*) &__ram_userspace_start__;
        uint32_t sp = *reset_fetch;
@@ -85,7 +85,7 @@ void uart0_poll_init(enum uart_baudrate br)
         UART0->C2 |= 1 << UART0_C2_RE_SHIFT;
 }
 
-void uart0_poll_deinit(void)
+void uart0_deinit(void)
 {
         SIM->SCGC5 &= ~SIM_SCGC5_PORTA_MASK;
         SIM->SCGC4 &= ~SIM_SCGC4_UART0_MASK;
@@ -96,7 +96,7 @@ void uart0_poll_deinit(void)
  *Reset handler, invoked during MCU's startup.
  *Sets clocks, disables IRQs, initializes .bss section with zeros,
  *copies initialized variables to .data section, fills userspace with zeros,
- *relocates .vectors table, branches to main().
+ *relocates .vectors table (only in user's app as for now), branches to main().
  */
  void Reset_Handler(void)
 {
