@@ -28,7 +28,7 @@ void uart0_poll_init(enum baudrate br);
 void uart0_deinit(void);
 
 /*
- *Initialize green led;
+ *Initialize green led. 
  */
 void led_init(void);
 
@@ -54,21 +54,10 @@ __attribute__((naked)) void goto_userspace(uint32_t sp, uint32_t pc)
 
 
 int main(void)
-
-{
-        char *buf = "Welcome to BOO-OTA!\n\rBootloader program enabling "
-                     "OTA software update feature.\n\rMade by Jan Kuliga"
-                     "\n\rFollow this project here: https://github.com/kuliga/boo-ota\n\rTMP2\n";
-
+{      
         uart0_poll_init(__115200__);
         led_init();
-        
-        for (buf; *buf != 0; buf++) {
-                while(!(UART0->S1 & UART0_S1_TDRE_MASK));
-                UART0->D = (uint8_t) *buf;
-        }
-                
-        
+
         uint8_t *userspace = (uint8_t*) &__ram_userspace_start__;
         while (1) {        
                 while (UART0->S1 & UART0_S1_RDRF_MASK) 
@@ -81,7 +70,7 @@ int main(void)
         }
             
 exit:  ;
-       led_init();
+       led_deinit();
        uart0_deinit();
        
        uint32_t *reset_fetch = (uint32_t*) &__ram_userspace_start__;
@@ -111,8 +100,6 @@ void uart0_poll_init(enum baudrate br)
 
 void uart0_deinit(void)
 {
-        PORTA->PCR[1] = PORT_PCR_MUX(0);
-        PORTA->PCR[2] = PORT_PCR_MUX(0);
         SIM->SCGC5 &= ~SIM_SCGC5_PORTA_MASK;
         SIM->SCGC4 &= ~SIM_SCGC4_UART0_MASK;
         SIM->SOPT2 &= ~SIM_SOPT2_UART0SRC_MASK;
