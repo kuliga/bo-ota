@@ -22,7 +22,7 @@
   .syntax unified
   .code 16
 
-  .section .text, "ax"
+  .section .init, "ax"
   .align 0
 
 /*****************************************************************************

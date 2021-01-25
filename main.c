@@ -76,11 +76,42 @@ exit:  ;
        uint32_t *reset_fetch = (uint32_t*) &__ram_userspace_start__;
        uint32_t sp = *reset_fetch;
        uint32_t pc = *(reset_fetch + 1);
-       
+ 
        goto_userspace(sp, pc);
        
        while (1);
 }
+
+/*
+ *Reset handler, invoked during MCU's startup.
+ *Sets clocks, disables IRQs, initializes .bss section with zeros,
+ *copies initialized variables to .data section, fills userspace with zeros,
+ *relocates .vectors table (only in user's app as for now), branches to main().
+ */
+ void Reset_Handler(void)
+{
+        SystemInit();
+        
+        __disable_irq();
+        
+        uint32_t *tmp = &_sbss;
+        for (tmp; tmp < &_ebss; tmp++)
+                *tmp = 0;
+                
+        tmp = &_sdata;
+        uint32_t *init_vars = &_etext;
+        for (tmp; tmp < &_edata; tmp++)
+                *tmp = *init_vars++;
+        
+	/*ONLY FOR BOOTLOADER*/        
+	tmp = &__ram_userspace_start__;
+        for (tmp; tmp < &__ram_start__; tmp++)
+                *tmp = 0;
+        
+        main();
+        
+        while (1);
+}       
 
 void uart0_poll_init(enum baudrate br)
 {
@@ -117,36 +148,4 @@ void led_deinit(void)
         PORTE->PCR[29] = PORT_PCR_MUX(0);
         SIM->SCGC5 &= ~SIM_SCGC5_PORTE_MASK;
 }       
-        
-/*
- *Reset handler, invoked during MCU's startup.
- *Sets clocks, disables IRQs, initializes .bss section with zeros,
- *copies initialized variables to .data section, fills userspace with zeros,
- *relocates .vectors table (only in user's app as for now), branches to main().
- */
- void Reset_Handler(void)
-{
-        SystemInit();
-        
-        __disable_irq();
-        
-        uint32_t *tmp = &_sbss;
-        for (tmp; tmp < &_ebss; tmp++)
-                *tmp = 0;
-                
-        tmp = &_sdata;
-        uint32_t *init_vars = &_etext;
-        for (tmp; tmp < &_edata; tmp++)
-                *tmp = *init_vars++;
-        
-	/*ONLY FOR BOOTLOADER*/        
-	tmp = &__ram_userspace_start__;
-        for (tmp; tmp < &__ram_start__; tmp++)
-                *tmp = 0;
-                
-        main();
-        
-        while (1);
-}       
-                                        
 
