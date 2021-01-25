@@ -106,16 +106,16 @@ void uart0_deinit(void)
 }
 
 void led_init(void)
-{
-        SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK;
-        PORTD->PCR[5] = PORT_PCR_MUX(1);
-        PTD->PDDR |= 1 << 5;
+{    
+        SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
+        PORTE->PCR[29] |= PORT_PCR_MUX(1);
+        PTE->PDDR |= 1 << 29;
 }
 
 void led_deinit(void)
 {
-        PORTD->PCR[5] = PORT_PCR_MUX(0);
-        SIM->SCGC5 &= ~SIM_SCGC5_PORTD_MASK;
+        PORTE->PCR[29] = PORT_PCR_MUX(0);
+        SIM->SCGC5 &= ~SIM_SCGC5_PORTE_MASK;
 }       
         
 /*
