@@ -28,12 +28,12 @@ void uart0_poll_init(enum baudrate br);
 void uart0_deinit(void);
 
 /*
- *Initialize green led. 
+ *Initialize red led. 
  */
 void led_init(void);
 
 /*
- *Deinitialize green led.
+ *Deinitialize red led.
  */
 void led_deinit(void);
 
