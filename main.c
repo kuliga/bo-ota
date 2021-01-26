@@ -86,7 +86,7 @@ exit:  ;
  *Reset handler, invoked during MCU's startup.
  *Sets clocks, disables IRQs, initializes .bss section with zeros,
  *copies initialized variables to .data section, fills userspace with zeros,
- *relocates .vectors table (only in user's app as for now), branches to main().
+ *branches to main().
  */
  void Reset_Handler(void)
 {
