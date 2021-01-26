@@ -18,6 +18,9 @@ void gpio_init(void);
 
 void uart0_init(enum baudrate br);
 
+/*
+ *Highly experimental handler, not necessarily needed for testing the bootloader.
+ */
 void PORTC_PORTD_IRQHandler(void)
 {
         uint32_t gpio_state = PTC->PDIR;
